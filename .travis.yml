@@ -8,7 +8,7 @@ cache:
     - "node_modules"
 env:
   global:
-    - CC_TEST_REPORTER_ID=544ca3cabbabe25f87c4a8cf50edb252962068bd555793a5e4258184d8e7d1b8
+    - CC_TEST_REPORTER_ID=77900f9c827131b18283ed64c107901d384e1b899122079b565802a096fa0feb
     - PORT=4400
     - NODE_ENV=test
     - GATEWAY_URL=http://127.0.0.1:9000
