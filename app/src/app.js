@@ -1,4 +1,3 @@
-const config = require('config');
 const logger = require('logger');
 const path = require('path');
 const convert = require('koa-convert');
@@ -78,9 +77,9 @@ async function init() {
 
         // get port of environment, if not exist obtain of the config.
         // In production environment, the port must be declared in environment variable
-        const port = process.env.PORT || config.get('service.port');
+        const port = process.env.PORT;
 
-        const server = appServer.listen(process.env.PORT, () => {
+        const server = appServer.listen(port, () => {
             resolve({
                 app,
                 server
