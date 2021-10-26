@@ -1,6 +1,6 @@
 # GFW Contact API
 
-[![Build Status](https://travis-ci.com/gfw-api/gfw-contact-api.svg?branch=dev)](https://travis-ci.com/gfw-api/gfw-contact-api)
+[![Build Status](https://app.travis-ci.com/gfw-api/gfw-contact-api.svg?branch=dev)](https://app.travis-ci.com/gfw-api/gfw-contact-api)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/fab79a90388b1e5fe157/test_coverage)](https://codeclimate.com/github/gfw-api/gfw-contact-api/test_coverage)
 
 This repository is the microservice that implements the contact functionality
