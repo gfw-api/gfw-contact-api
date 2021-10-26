@@ -1,0 +1,8 @@
+base:
+  build: .
+  ports:
+    - "4401:4401"
+  environment:
+    PORT: 4401
+    NODE_PATH: app/src
+  container_name: gfw-contact-api

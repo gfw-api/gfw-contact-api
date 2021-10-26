@@ -1,0 +1,140 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: contact
+  name: contact
+  namespace: fw
+spec:
+  progressDeadlineSeconds: 2147483647
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      name: contact
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name: contact
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: type
+                    operator: In
+                    values:
+                      - gfw
+      containers:
+        - args:
+            - start
+          env:
+            - name: PORT
+              value: "4400"
+            - name: NODE_ENV
+              value: staging
+            - name: NODE_PATH
+              value: app/src
+            - name: LOCAL_URL
+              value: http://contact.fw.svc.cluster.local:4400
+            - name: QUEUE_PROVIDER
+              value: redis
+            - name: QUEUE_NAME
+              value: mail_staging
+            - name: WRI_MAIL_RECIPIENTS
+              value: raul.requero@vizzuality.com,sergio.gordillo@vizzuality.com
+            - name: QUEUE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: REDIS_URI
+                  name: dbsecrets
+            - name: GATEWAY_URL
+              valueFrom:
+                secretKeyRef:
+                  key: GATEWAY_URL
+                  name: mssecrets
+            - name: MICROSERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: MICROSERVICE_TOKEN
+                  name: mssecrets
+            - name: GOOGLE_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: CONTACT_GOOGLE_SHEETS_PRIVATE_KEY
+                  name: mssecrets
+            - name: GOOGLE_PROJECT_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  key: CONTACT_GOOGLE_SHEETS_PROJECT_EMAIL
+                  name: mssecrets
+            - name: TARGET_SHEET_ID
+              value: 1JsXX7aE_XlJm-WWhs6wM5IW0UfLi-K9OmOx0mkIb0uA
+            - name: LEGACY_TEMPLATE_ID
+              value: 597b0f55856351000b087c9c
+            - name: DEFAULT_TEMPLATE_ID
+              value: 59b6a26b138f260012e9fdeb
+            - name: FASTLY_ENABLED
+              valueFrom:
+                secretKeyRef:
+                  key: FASTLY_ENABLED
+                  name: mssecrets
+            - name: FASTLY_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  key: FASTLY_APIKEY
+                  name: mssecrets
+                  optional: true
+            - name: FASTLY_SERVICEID
+              valueFrom:
+                secretKeyRef:
+                  key: FASTLY_SERVICEID
+                  name: mssecrets
+                  optional: true
+          image: gfwdockerhub/contact
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthcheck
+              port: 4400
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: contact
+          ports:
+            - containerPort: 4400
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthcheck
+              port: 4400
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512M
+            requests:
+              cpu: 250m
+              memory: 256M
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+        - name: regcred
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
