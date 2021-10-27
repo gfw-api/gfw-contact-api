@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: gfw
     name: gfw-contact
   name: gfw-contact
   namespace: gfw
@@ -11,7 +10,7 @@ spec:
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      name: contact
+      name: gfw-contact
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -20,7 +19,7 @@ spec:
   template:
     metadata:
       labels:
-        name: contact
+        name: gfw-contact
     spec:
       affinity:
         nodeAffinity:
@@ -41,8 +40,6 @@ spec:
               value: prod
             - name: NODE_PATH
               value: app/src
-            - name: LOCAL_URL
-              value: http://contact.fw.svc.cluster.local:4400
             - name: QUEUE_PROVIDER
               value: redis
             - name: QUEUE_NAME

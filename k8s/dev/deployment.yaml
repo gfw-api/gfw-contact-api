@@ -10,7 +10,7 @@ spec:
   revisionHistoryLimit: 0
   selector:
     matchLabels:
-      name: contact
+      name: gfw-contact
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -19,7 +19,7 @@ spec:
   template:
     metadata:
       labels:
-        name: contact
+        name: gfw-contact
     spec:
       affinity:
         nodeAffinity:
@@ -40,8 +40,6 @@ spec:
               value: staging
             - name: NODE_PATH
               value: app/src
-            - name: LOCAL_URL
-              value: http://contact.fw.svc.cluster.local:4400
             - name: QUEUE_PROVIDER
               value: redis
             - name: QUEUE_NAME
