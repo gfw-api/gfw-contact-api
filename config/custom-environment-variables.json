@@ -5,6 +5,9 @@
     "queueProvider": "QUEUE_PROVIDER",
     "queueName": "QUEUE_NAME"
   },
+  "service": {
+    "port": "PORT"
+  },
   "wriMail": {
     "recipients": "WRI_MAIL_RECIPIENTS"
   },

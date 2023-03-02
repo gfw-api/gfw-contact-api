@@ -1,4 +1,4 @@
-FROM mhart/alpine-node:12
+FROM node:18.14-buster-slim
 MAINTAINER info@vizzuality.com
 
 ENV NAME gfw-contact-api

@@ -5,6 +5,9 @@
     "toFile": false,
     "dirLogFile": null
   },
+  "service": {
+    "port": 4400
+  },
   "wriMail": {
     "recipients": "",
     "template": "data-contribution"

@@ -1,36 +1,41 @@
-/* eslint-disable consistent-return,class-methods-use-this */
-const config = require('config');
-const logger = require('logger');
-const { GoogleSpreadsheet } = require('google-spreadsheet');
+import config from 'config';
+import {
+    GoogleSpreadsheet,
+    GoogleSpreadsheetCell, GoogleSpreadsheetRow,
+    GoogleSpreadsheetWorksheet
+} from 'google-spreadsheet';
+import logger from 'logger';
 
-const CONTACT_US_SHEET_INDEX = 1;
-const REQUEST_WEBINAR_SHEET_TITLE = 'Webinar Requests';
+const CONTACT_US_SHEET_INDEX: number = 1;
+const REQUEST_WEBINAR_SHEET_TITLE: string = 'Webinar Requests';
 
 class GoogleSheetsService {
+    creds: Record<string, any>;
+    doc: any;
 
     constructor() {
         this.creds = config.get('googleSheets');
         this.doc = new GoogleSpreadsheet(this.creds.target_sheet_id);
     }
 
-    async authSheets() {
+    async authSheets(): Promise<void> {
         return this.doc.useServiceAccountAuth({
             private_key: this.creds.private_key.replace(/\\n/g, '\n'),
             client_email: this.creds.client_email,
         });
     }
 
-    async updateSheet(user) {
+    async updateSheet(user: Record<string, any>): Promise<GoogleSpreadsheetRow | any> {
         try {
             await this.authSheets();
 
             // Load cells
             await this.doc.loadInfo();
-            const sheet = await this.doc.sheetsByIndex[CONTACT_US_SHEET_INDEX];
+            const sheet: GoogleSpreadsheetWorksheet = await this.doc.sheetsByIndex[CONTACT_US_SHEET_INDEX];
             await sheet.loadCells();
 
-            for (let i = 0; i < sheet.rowCount; i++) {
-                const cell = await sheet.getCell(i, 5);
+            for (let i: number = 0; i < sheet.rowCount; i++) {
+                const cell: GoogleSpreadsheetCell = await sheet.getCell(i, 5);
                 if (cell.value === user.email) {
                     logger.info('User already exists. Updating....');
                     return this.updateCells(cell, user);
@@ -39,7 +44,7 @@ class GoogleSheetsService {
 
             if (user.signup === 'true') {
                 logger.info('User does not exist. Adding....');
-                const newRow = {
+                const newRow: Record<string, any> = {
                     agreed_to_test: 'yes',
                     'Date First Added': this.getDate(),
                     Email: user.email,
@@ -53,11 +58,11 @@ class GoogleSheetsService {
         }
     }
 
-    async updateCells(row, user) {
+    async updateCells(row: Record<string, any>, user: Record<string, any>): Promise<GoogleSpreadsheetRow[] | any> {
         try {
             logger.info('Getting user....');
-            const sheet = await this.doc.sheetsByIndex[CONTACT_US_SHEET_INDEX];
-            const rows = sheet.getRows({ offset: row.row - 1, limit: 1 });
+            const sheet: GoogleSpreadsheetWorksheet = await this.doc.sheetsByIndex[CONTACT_US_SHEET_INDEX];
+            const rows: GoogleSpreadsheetRow[] = await sheet.getRows({ offset: row.row - 1, limit: 1 });
             logger.info('Found user....');
             rows[0].source = 'GFW Feedback form';
             rows[0].agreedtotest = user.signup === 'true' ? 'yes' : 'no';
@@ -65,35 +70,34 @@ class GoogleSheetsService {
             logger.info('User updated');
             return rows;
         } catch (err) {
-            logger.debug(err);
+            logger.error(err);
         }
     }
 
-    getDate() {
-        let today = new Date();
-        let dd = today.getDate();
-        let mm = today.getMonth() + 1; // January is 0!
+    getDate(): string {
+        const today: Date = new Date();
+        let dd: number | string = today.getDate();
+        let mm: number | string = today.getMonth() + 1; // January is 0!
 
-        const yyyy = today.getFullYear();
+        const yyyy: number = today.getFullYear();
         if (dd < 10) {
             dd = `0${dd}`;
         }
         if (mm < 10) {
             mm = `0${mm}`;
         }
-        today = `${mm}/${dd}/${yyyy}`;
-        return today;
+        return `${mm}/${dd}/${yyyy}`;
     }
 
-    async requestWebinar(data) {
+    async requestWebinar(data: Record<string, any>): Promise<GoogleSpreadsheetRow> {
         try {
             // Auth using promises
             await this.authSheets();
             logger.info('[GoogleSheetsService] Adding a new webinar request...');
 
             await this.doc.loadInfo();
-            const sheet = this.doc.sheetsByTitle[REQUEST_WEBINAR_SHEET_TITLE];
-            const rowResult = await sheet.addRow(data);
+            const sheet: GoogleSpreadsheetWorksheet = this.doc.sheetsByTitle[REQUEST_WEBINAR_SHEET_TITLE];
+            const rowResult: GoogleSpreadsheetRow = await sheet.addRow(data);
             logger.info('[GoogleSheetsService] Added new webinar request.');
 
             return rowResult;
@@ -105,4 +109,4 @@ class GoogleSheetsService {
 
 }
 
-module.exports = new GoogleSheetsService();
+export default new GoogleSheetsService();
