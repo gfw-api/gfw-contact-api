@@ -5,7 +5,7 @@ ENV NAME gfw-contact-api
 ENV USER microservice
 
 RUN apt-get update -y && apt-get upgrade -y && \
-    apt-get install -y bash git ssh python3 make
+    apt-get install -y bash git
 
 RUN addgroup $USER && useradd -ms /bin/bash $USER -g $USER
 
@@ -22,7 +22,6 @@ COPY test /opt/$NAME/test
 
 WORKDIR /opt/$NAME
 
-COPY ./app /opt/$NAME/app
 RUN chown -R $USER:$USER /opt/$NAME
 
 # Tell Docker we are going to use this ports
