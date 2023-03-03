@@ -1,17 +1,17 @@
-const nock = require('nock');
-const chai = require('chai');
-const sinon = require('sinon');
-
-const GoogleSheetsService = require('services/googleSheetsService');
-const { getTestServer } = require('./utils/test-server');
+import nock from 'nock';
+import chai from 'chai';
+import sinon from 'sinon';
+import ChaiHttp from 'chai-http';
+import GoogleSheetsService from 'services/googleSheets.service';
+import { getTestServer } from './utils/test-server';
 
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
 
 chai.should();
 
-let requester;
-let sinonSandbox;
+let requester: ChaiHttp.Agent;
+let sinonSandbox: sinon.SinonSandbox;
 
 describe('Request webinar endpoint tests', () => {
     before(async () => {
@@ -53,7 +53,7 @@ describe('Request webinar endpoint tests', () => {
 
     it('A new line is added to the Google Spreadsheet when valid data us provided (happy case)', async () => {
         sinonSandbox.stub(GoogleSheetsService, 'requestWebinar')
-            .callsFake(() => new Promise((resolve) => resolve()));
+            .callsFake(() => new Promise((resolve) => resolve(null)));
 
         const response = await requester.post(`/api/v1/form/request-webinar`).send({
             name: 'Test',

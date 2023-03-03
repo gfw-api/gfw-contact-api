@@ -1,17 +1,17 @@
-const nock = require('nock');
-const chai = require('chai');
-const sinon = require('sinon');
-
-const GoogleSheetsService = require('services/googleSheetsService');
-const { getTestServer } = require('./utils/test-server');
+import nock from 'nock';
+import chai from 'chai';
+import sinon from 'sinon';
+import ChaiHttp from 'chai-http';
+import GoogleSheetsService from 'services/googleSheets.service';
+import { getTestServer } from './utils/test-server';
 
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
 
 chai.should();
 
-let requester;
-let sinonSandbox;
+let requester: ChaiHttp.Agent;
+let sinonSandbox: sinon.SinonSandbox;
 
 describe('Contact us endpoint tests', () => {
     before(async () => {
@@ -22,17 +22,19 @@ describe('Contact us endpoint tests', () => {
         requester = await getTestServer();
     });
 
-    beforeEach(() => { sinonSandbox = sinon.createSandbox(); });
+    beforeEach(() => {
+        sinonSandbox = sinon.createSandbox();
+    });
 
     it('Calling the contact us endpoint returns 200 OK (happy case)', async () => {
         sinonSandbox.stub(GoogleSheetsService, 'authSheets')
-            .callsFake(() => new Promise((resolve) => resolve()));
+            .callsFake(() => new Promise((resolve) => resolve(null)));
         sinonSandbox.stub(GoogleSheetsService, 'updateSheet')
-            .callsFake(() => new Promise((resolve) => resolve()));
+            .callsFake(() => new Promise((resolve) => resolve(null)));
 
         const response = await requester.post(`/api/v1/form/contact-us`).send({ tool: 'gfw' });
         response.status.should.equal(200);
-        response.body.should.equal('');
+        response.body.should.eql({});
     });
 
     afterEach(async () => {
