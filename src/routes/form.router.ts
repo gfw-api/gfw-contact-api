@@ -38,7 +38,7 @@ class FormRouter {
 
         // send mail to recipient
         logger.debug('Sending mail...');
-        mailService.sendMail(mailParams.template, mailData, wriRecipients);
+        await mailService.sendMail(mailParams.template, mailData, wriRecipients);
 
         // send mail to user
         logger.debug('Getting user language...');
@@ -49,7 +49,7 @@ class FormRouter {
 
         const template: EmailTemplates = `${mailParams.templateConfirm}-${language}` as EmailTemplates;
         logger.debug('Sending mail to user with template ', template);
-        mailService.sendMail(mailParams.templateConfirm, mailData, [{
+        await mailService.sendMail(mailParams.templateConfirm, mailData, [{
             address: ctx.request.body.email
         }]);
 

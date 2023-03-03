@@ -28,12 +28,6 @@ class MailService {
     }
 
     async sendMail(template: EmailTemplates, data: Record<string, any>, recipients: SparkPost.Recipient[], sender: string = 'gfw'): Promise<number> {
-        // this.asynClient.emit(JSON.stringify({
-        //     template,
-        //     data,
-        //     recipients
-        // }));
-
         const message: string = JSON.stringify({
             template,
             data,
@@ -45,7 +39,6 @@ class MailService {
         await this.#connect();
 
         return this.redisClient.publish(CHANNEL, message);
-
     }
 
 }
