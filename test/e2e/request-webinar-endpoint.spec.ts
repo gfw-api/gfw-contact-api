@@ -94,7 +94,11 @@ describe('Request webinar endpoint tests', () => {
         const validateMailQueuedMessages = (resolve: (value: (PromiseLike<unknown> | unknown)) => void) => async (message: string) => {
             const jsonMessage = JSON.parse(message);
             jsonMessage.should.have.property('template').and.equal(config.get('requestWebinarEmail.template'));
-            jsonMessage.should.have.property('data').and.deep.equal(requestData);
+            jsonMessage.should.have.property('data').and.deep.equal({
+                name: 'Test',
+                user_email: 'example@gmail.com',
+                request: 'Webinar request test',
+            });
             jsonMessage.should.have.property('recipients').and.deep.equal([{ address: config.get('requestWebinarEmail.emailTo') }]);
 
             expectedQueueMessageCount -= 1;

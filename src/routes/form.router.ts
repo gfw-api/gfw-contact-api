@@ -94,7 +94,7 @@ class FormRouter {
         }));
 
         const mailData: Record<string, any> = {
-            email: ctx.request.body.email,
+            user_email: ctx.request.body.email,
             name: ctx.request.body.name,
             request: ctx.request.body.request,
         };
