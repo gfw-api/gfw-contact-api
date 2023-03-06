@@ -1,20 +1,10 @@
 {
-  "apiGateway": {
-    "uri": "API_GATEWAY_URI",
-    "queueUrl": "QUEUE_URL",
-    "queueProvider": "QUEUE_PROVIDER",
+  "redis": {
+    "url": "QUEUE_URL",
     "queueName": "QUEUE_NAME"
   },
   "service": {
     "port": "PORT"
-  },
-  "wriMail": {
-    "recipients": "WRI_MAIL_RECIPIENTS"
-  },
-  "googleSheets": {
-    "private_key": "GOOGLE_PRIVATE_KEY",
-    "client_email": "GOOGLE_PROJECT_EMAIL",
-    "target_sheet_id": "TARGET_SHEET_ID"
   },
   "logger": {
     "level": "LOGGER_LEVEL"

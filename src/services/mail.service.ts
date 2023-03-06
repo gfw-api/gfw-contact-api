@@ -4,7 +4,7 @@ import { createClient, RedisClientType } from 'redis';
 import { EmailTemplates } from 'types/email.type';
 import SparkPost from 'sparkpost';
 
-const CHANNEL:string = config.get('apiGateway.queueName');
+const CHANNEL:string = config.get('redis.queueName');
 
 class MailService {
 
@@ -15,7 +15,7 @@ class MailService {
         logger.debug('[MailService] Initializing mail queue');
 
         this.redisClient = createClient({
-            url: config.get('apiGateway.queueUrl')
+            url: config.get('redis.url')
         });
     }
 

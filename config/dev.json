@@ -1,8 +1,2 @@
 {
-  "s3": {
-    "accessKeyId": null,
-    "secretAccessKey": null,
-    "bucket": null,
-    "folder": "contact-dev"
-  }
 }

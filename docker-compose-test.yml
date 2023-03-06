@@ -12,7 +12,6 @@ services:
       QUEUE_NAME: mail
       QUEUE_PROVIDER: redis
       QUEUE_URL: redis://redis:6379
-      TARGET_SHEET_ID: TARGET_SHEET_ID
       LOCAL_URL: http://gfw-contact:4400
       MICROSERVICE_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1pY3Jvc2VydmljZSIsImNyZWF0ZWRBdCI6IjIwMTYtMDktMTQifQ.IRCIRm1nfIQTfda_Wb6Pg-341zhV8soAgzw7dd5HxxQ
       FASTLY_ENABLED: "false"
