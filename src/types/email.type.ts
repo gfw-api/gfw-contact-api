@@ -1,11 +1,4 @@
 export type EmailTemplates =
-    'data-contribution'
-    | 'data-contribution-confirmation-en'
-    | 'data-contribution-confirmation-es'
-    | 'data-contribution-confirmation-fr'
-    | 'data-contribution-confirmation-id'
-    | 'data-contribution-confirmation-pt'
-    | 'data-contribution-confirmation-zh'
     | 'contact-form'
     | 'contact-form-confirmation-en'
     | 'contact-form-confirmation-es'

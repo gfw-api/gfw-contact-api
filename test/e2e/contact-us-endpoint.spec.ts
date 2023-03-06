@@ -46,7 +46,7 @@ describe('Contact us endpoint tests', () => {
                     });
                     jsonMessage.should.have.property('recipients').and.deep.equal([{ address: config.get('contactEmail.tools.not-applicable.emailTo') }]);
                     break;
-                case 'contact-form-confirmation':
+                case 'contact-form-confirmation-en':
                     jsonMessage.should.have.property('data').and.deep.equal({
                         user_email: 'test@user.org',
                         topic: config.get('contactEmail.topics.general-inquiry.name'),
@@ -104,7 +104,7 @@ describe('Contact us endpoint tests', () => {
                     });
                     jsonMessage.should.have.property('recipients').and.deep.equal([{ address: config.get('contactEmail.tools.fw.emailTo') }]);
                     break;
-                case 'contact-form-confirmation':
+                case 'contact-form-confirmation-en':
                     jsonMessage.should.have.property('data').and.deep.equal({
                         user_email: 'test@user.org',
                         topic: config.get('contactEmail.topics.report-a-bug-or-error.name'),
@@ -137,6 +137,64 @@ describe('Contact us endpoint tests', () => {
         const response = await requester
             .post(`/api/v1/form/contact-us`)
             .send({ email: 'test@user.org', message: 'This is a test message', topic: 'report-a-bug-or-error', tool: 'fw' });
+
+        response.status.should.equal(200);
+        response.body.should.eql({});
+
+        return consumerPromise;
+    });
+
+    it('Calling the contact us endpoint returns 200 OK (happy case, custom topic and tool, custom language)', async () => {
+        let expectedQueueMessageCount = 2;
+
+        const validateMailQueuedMessages = (resolve: (value: (PromiseLike<unknown> | unknown)) => void) => async (message: string) => {
+            const jsonMessage = JSON.parse(message);
+            jsonMessage.should.have.property('template');
+            switch (jsonMessage.template) {
+
+                case 'contact-form':
+                    jsonMessage.should.have.property('data').and.deep.equal({
+                        user_email: 'test@user.org',
+                        topic: config.get('contactEmail.topics.report-a-bug-or-error.name'),
+                        tool: config.get('contactEmail.tools.fw.name'),
+                        message: 'This is a test message',
+                        subject: `Contact form: ${config.get('contactEmail.topics.report-a-bug-or-error.name')} for ${config.get('contactEmail.tools.fw.name')}`
+                    });
+                    jsonMessage.should.have.property('recipients').and.deep.equal([{ address: config.get('contactEmail.tools.fw.emailTo') }]);
+                    break;
+                case 'contact-form-confirmation-es':
+                    jsonMessage.should.have.property('data').and.deep.equal({
+                        user_email: 'test@user.org',
+                        topic: config.get('contactEmail.topics.report-a-bug-or-error.name'),
+                        tool: config.get('contactEmail.tools.fw.name'),
+                        message: 'This is a test message',
+                        subject: `Contact form: ${config.get('contactEmail.topics.report-a-bug-or-error.name')} for ${config.get('contactEmail.tools.fw.name')}`
+                    });
+                    jsonMessage.should.have.property('recipients').and.deep.equal([{ address: 'test@user.org' }]);
+                    break;
+                default:
+                    should.fail('Unsupported message type: ', jsonMessage.template);
+                    break;
+            }
+
+            expectedQueueMessageCount -= 1;
+
+            if (expectedQueueMessageCount < 0) {
+                throw new Error(`Unexpected message count - expectedQueueMessageCount:${expectedQueueMessageCount}`);
+            }
+
+            if (expectedQueueMessageCount === 0) {
+                resolve(null);
+            }
+        };
+
+        const consumerPromise = new Promise((resolve) => {
+            redisClient.subscribe(CHANNEL, validateMailQueuedMessages(resolve));
+        })
+
+        const response = await requester
+            .post(`/api/v1/form/contact-us`)
+            .send({ email: 'test@user.org', message: 'This is a test message', topic: 'report-a-bug-or-error', tool: 'fw', language: 'es_MX' });
 
         response.status.should.equal(200);
         response.body.should.eql({});

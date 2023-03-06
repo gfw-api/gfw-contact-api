@@ -12,6 +12,7 @@ formRouter.prefix('/api/v1/form');
 
 const Joi: typeof router.Joi = router.Joi;
 
+const ALLOWED_LANGUAGES: string[] = ['en', 'es_MX', 'fr', 'id', 'pt_BR', 'zh'];
 const ALLOWED_TOOLS: string[] = ['gfw', 'gfw-pro', 'fw', 'blog', 'map-builder', 'not-applicable'];
 const ALLOWED_TOPICS: string[] = ['report-a-bug-or-error', 'provide-feedback', 'data-related-inquiry', 'general-inquiry'];
 
@@ -24,6 +25,7 @@ const contactUsValidation: Record<string, any> = {
         email: Joi.string().email().required(),
         topic: Joi.string().valid(...ALLOWED_TOPICS).default('general-inquiry').optional(),
         tool: Joi.string().valid(...ALLOWED_TOOLS).default('not-applicable').optional(),
+        language: Joi.string().valid(...ALLOWED_LANGUAGES).default('en').optional(),
         message: Joi.string().required(),
     }).required()
 };
@@ -69,14 +71,11 @@ class FormRouter {
 
         // send mail to user
         logger.debug('Getting user language...');
-        let language: string = 'en';
-        if (ctx.request.body.language) {
-            language = ctx.request.body.language.toLowerCase().replace('_', '-');
-        }
+        const language: string = ctx.request.body.language.toLowerCase().split('_')[0];
 
         const template: EmailTemplates = `${mailParams.templateConfirm}-${language}` as EmailTemplates;
         logger.debug('Sending mail to user with template ', template);
-        await mailService.sendMail(mailParams.templateConfirm, mailData, [{
+        await mailService.sendMail(template, mailData, [{
             address: ctx.request.body.email
         }]);
 
