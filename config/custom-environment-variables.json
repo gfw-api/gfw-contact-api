@@ -6,6 +6,10 @@
   "service": {
     "port": "PORT"
   },
+  "requestWebinarEmail": {
+    "template": "REQUEST_WEBINAR_EMAIL_TEMPLATE",
+    "emailTo": "REQUEST_WEBINAR_EMAIL_TO_ADDRESS"
+  },
   "logger": {
     "level": "LOGGER_LEVEL"
   }
