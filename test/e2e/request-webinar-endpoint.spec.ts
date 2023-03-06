@@ -1,17 +1,18 @@
 import nock from 'nock';
 import chai from 'chai';
-import sinon from 'sinon';
+import config from 'config';
+import { createClient, RedisClientType } from 'redis';
 import ChaiHttp from 'chai-http';
-import GoogleSheetsService from 'services/googleSheets.service';
 import { getTestServer } from './utils/test-server';
 
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
 
-chai.should();
+const should = chai.should();
 
 let requester: ChaiHttp.Agent;
-let sinonSandbox: sinon.SinonSandbox;
+const CHANNEL: string = config.get('redis.queueName');
+let redisClient: RedisClientType;
 
 describe('Request webinar endpoint tests', () => {
     before(async () => {
@@ -19,67 +20,116 @@ describe('Request webinar endpoint tests', () => {
             throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
         }
 
+        process.on('unhandledRejection', (error) => should.fail(error.toString()));
+
         requester = await getTestServer();
+
+        redisClient = createClient({ url: config.get('redis.url') });
+        await redisClient.connect();
     });
 
-    beforeEach(() => { sinonSandbox = sinon.createSandbox(); });
-
     it('Name is required when trying to create a new webinar request', async () => {
-        const response = await requester.post(`/api/v1/form/request-webinar`).send();
+        const response = await requester
+            .post(`/api/v1/form/request-webinar`)
+            .set('Content-Type', 'application/json')
+            .send();
+
         response.status.should.equal(400);
         response.body.should.have.property('errors').and.be.an('array').and.have.length(1);
-        response.body.errors[0].should.have.property('code').and.equal('NAME_REQUIRED');
-        response.body.errors[0].should.have.property('detail').and.equal('Name is required');
+        response.body.errors[0].should.have.property('status').and.equal(400);
+        response.body.errors[0].should.have.property('detail').and.equal('"name" is required');
     });
 
     it('Email is required when trying to create a new webinar request', async () => {
-        const response = await requester.post(`/api/v1/form/request-webinar`).send({ name: 'Test' });
+        const response = await requester
+            .post(`/api/v1/form/request-webinar`)
+            .set('Content-Type', 'application/json')
+            .send({ name: 'Test' });
+
         response.status.should.equal(400);
-        response.body.should.have.property('errors').and.be.an('array').and.have.length(1);
-        response.body.errors[0].should.have.property('code').and.equal('EMAIL_REQUIRED');
-        response.body.errors[0].should.have.property('detail').and.equal('Email is required');
+        response.body.should.have.property('errors').and.be.an('array').and.length(1);
+        response.body.errors[0].should.have.property('status', 400);
+        response.body.errors[0].should.have.property('detail', '"email" is required');
     });
 
     it('A correctly formatted email is required when trying to create a new webinar request', async () => {
-        const response = await requester.post(`/api/v1/form/request-webinar`).send({
-            name: 'Test',
-            email: 'test',
-        });
+        const response = await requester
+            .post(`/api/v1/form/request-webinar`)
+            .set('Content-Type', 'application/json')
+            .send({
+                name: 'Test',
+                email: 'test',
+            });
+
         response.status.should.equal(400);
-        response.body.should.have.property('errors').and.be.an('array').and.have.length(1);
-        response.body.errors[0].should.have.property('code').and.equal('EMAIL_INVALID');
-        response.body.errors[0].should.have.property('detail').and.equal('Email is invalid');
+        response.body.should.have.property('errors').and.be.an('array').and.length(1);
+        response.body.errors[0].should.have.property('status', 400);
+        response.body.errors[0].should.have.property('detail', '"email" must be a valid email');
     });
 
-    it('A new line is added to the Google Spreadsheet when valid data us provided (happy case)', async () => {
-        sinonSandbox.stub(GoogleSheetsService, 'requestWebinar')
-            .callsFake(() => new Promise((resolve) => resolve(null)));
+    it('A request text is required when trying to create a new webinar request', async () => {
+        const response = await requester
+            .post(`/api/v1/form/request-webinar`)
+            .set('Content-Type', 'application/json')
+            .send({
+                name: 'Test',
+                email: 'test@email.com',
+            });
 
-        const response = await requester.post(`/api/v1/form/request-webinar`).send({
+        response.status.should.equal(400);
+        response.body.should.have.property('errors').and.be.an('array').and.length(1);
+        response.body.errors[0].should.have.property('status', 400);
+        response.body.errors[0].should.have.property('detail', '"request" is required');
+    });
+
+    it('A request for a webinar should queue an email (happy case)', async () => {
+        const requestData = {
             name: 'Test',
             email: 'example@gmail.com',
             request: 'Webinar request test',
-        });
+        };
+
+        let expectedQueueMessageCount = 1;
+
+        const validateMailQueuedMessages = (resolve: (value: (PromiseLike<unknown> | unknown)) => void) => async (message: string) => {
+            const jsonMessage = JSON.parse(message);
+            jsonMessage.should.have.property('template').and.equal(config.get('requestWebinarEmail.template'));
+            jsonMessage.should.have.property('data').and.deep.equal(requestData);
+            jsonMessage.should.have.property('recipients').and.deep.equal([{ address: config.get('requestWebinarEmail.emailTo') }]);
+
+            expectedQueueMessageCount -= 1;
+
+            if (expectedQueueMessageCount < 0) {
+                throw new Error(`Unexpected message count - expectedQueueMessageCount:${expectedQueueMessageCount}`);
+            }
+
+            if (expectedQueueMessageCount === 0) {
+                resolve(null);
+            }
+        };
+
+        const consumerPromise = new Promise((resolve) => {
+            redisClient.subscribe(CHANNEL, validateMailQueuedMessages(resolve));
+        })
+
+        const response = await requester
+            .post(`/api/v1/form/request-webinar`)
+            .set('Content-Type', 'application/json')
+            .send(requestData);
         response.status.should.equal(204);
-    });
 
-    it('If an error is thrown while adding the webinar request to the sheet, 500 is returned (error case)', async () => {
-        sinonSandbox.stub(GoogleSheetsService, 'requestWebinar')
-            .callsFake(() => new Promise((resolve, reject) => reject()));
-
-        const response = await requester.post(`/api/v1/form/request-webinar`).send({
-            name: 'Test',
-            email: 'example@gmail.com',
-            request: 'Webinar request test',
-        });
-        response.status.should.equal(500);
+        return consumerPromise;
     });
 
     afterEach(async () => {
+        redisClient.removeAllListeners();
+
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
+    });
 
-        sinonSandbox.restore();
+    after(async () => {
+        process.removeAllListeners('unhandledRejection');
     });
 });

@@ -1,4 +1,8 @@
 {
+  "redis": {
+    "url": "QUEUE_URL",
+    "queueName": "QUEUE_NAME"
+  },
   "logger": {
     "name": "gfw-contact-DEV",
     "level": "debug",
@@ -8,17 +12,9 @@
   "service": {
     "port": 4400
   },
-  "wriMail": {
-    "recipients": "",
-    "template": "data-contribution"
-  },
-  "userMail": {
-    "template": "data-contribution-confirmation"
-  },
-  "googleSheets": {
-    "private_key": "example",
-    "client_email": "test@gmail.com",
-    "target_sheet_id": ""
+  "requestWebinarEmail": {
+    "template": "request-webinar-en",
+    "emailTo": "gfw@wri.org"
   },
   "contactEmail": {
     "template": "contact-form",

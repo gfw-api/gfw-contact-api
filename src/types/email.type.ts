@@ -13,4 +13,5 @@ export type EmailTemplates =
     | 'contact-form-confirmation-id'
     | 'contact-form-confirmation-pt'
     | 'contact-form-confirmation-zh'
+    | 'request-webinar-en'
 

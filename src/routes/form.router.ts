@@ -1,17 +1,44 @@
-import Router from 'koa-router';
+import router, { Router } from 'koa-joi-router';
 import logger from 'logger';
 import config from 'config';
 import { Context } from 'koa';
 
 import mailService from 'services/mail.service';
-import googleSheetsService from 'services/googleSheets.service';
 import SparkPost from 'sparkpost';
 import { EmailTemplates } from 'types/email.type';
 
+const formRouter: Router = router();
+formRouter.prefix('/api/v1/form');
 
-const router: Router = new Router({
-    prefix: '/api/v1/form'
-});
+const Joi: typeof router.Joi = router.Joi;
+
+const ALLOWED_TOOLS: string[] = ['gfw', 'gfw-pro', 'fw', 'blog', 'map-builder', 'not-applicable'];
+const ALLOWED_TOPICS: string[] = ['report-a-bug-or-error', 'provide-feedback', 'data-related-inquiry', 'general-inquiry'];
+
+const contactUsValidation: Record<string, any> = {
+    type: 'json',
+    query: {
+        loggedUser: Joi.any().optional(),
+    },
+    body: Joi.object({
+        email: Joi.string().email().required(),
+        topic: Joi.string().valid(...ALLOWED_TOPICS).default('general-inquiry').optional(),
+        tool: Joi.string().valid(...ALLOWED_TOOLS).default('not-applicable').optional(),
+        message: Joi.string().required(),
+    }).required()
+};
+
+const requestWebinarValidation: Record<string, any> = {
+    type: 'json',
+    query: {
+        loggedUser: Joi.any().optional(),
+    },
+    body: Joi.object({
+        name: Joi.string().required(),
+        email: Joi.string().email().required(),
+        request: Joi.string().required(),
+    }).required()
+};
 
 class FormRouter {
 
@@ -53,13 +80,6 @@ class FormRouter {
             address: ctx.request.body.email
         }]);
 
-        // Update Google SpreadSheet for beta users
-        try {
-            await googleSheetsService.updateSheet(ctx.request.body);
-        } catch (err) {
-            logger.error(err);
-        }
-
         ctx.body = '';
     }
 
@@ -69,37 +89,36 @@ class FormRouter {
         const { name, email, request } = ctx.request.body;
         logger.info(`Name: ${name}, Email: ${email}, Request: ${request}`);
 
-        const validateEmail = (str: string): boolean => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(str);
-        const sendValidationError = (message: string, code: string, status: number = 400): void => {
-            ctx.status = status;
-            ctx.body = { errors: [{ detail: message, code }] };
+        const mailParams: { template: EmailTemplates, emailTo: string } = config.get('requestWebinarEmail');
+        const wriRecipients: SparkPost.Recipient[] = mailParams.emailTo.split(',').map((mail: string) => ({
+            address: mail
+        }));
+
+        const mailData: Record<string, any> = {
+            email: ctx.request.body.email,
+            name: ctx.request.body.name,
+            request: ctx.request.body.request,
         };
 
-        if (!name) {
-            sendValidationError('Name is required', 'NAME_REQUIRED');
-            return;
-        }
-        if (!email) {
-            sendValidationError('Email is required', 'EMAIL_REQUIRED');
-            return;
-        }
-        if (!validateEmail(email)) {
-            sendValidationError('Email is invalid', 'EMAIL_INVALID');
-            return;
-        }
+        await mailService.sendMail(mailParams.template, mailData, wriRecipients);
 
-        try {
-            await googleSheetsService.requestWebinar({ name, email, request });
-            ctx.status = 204;
-        } catch (err) {
-            logger.error(err);
-            ctx.status = 500;
-        }
+        ctx.status = 204;
     }
 
 }
 
-router.post('/contact-us', FormRouter.contactUs);
-router.post('/request-webinar', FormRouter.requestWebinar);
+// formRouter.post('/contact-us', FormRouter.contactUs);
+formRouter.route({
+    method: 'post',
+    path: '/contact-us',
+    validate: contactUsValidation,
+    handler: FormRouter.contactUs,
+});
+formRouter.route({
+    method: 'post',
+    path: '/request-webinar',
+    validate: requestWebinarValidation,
+    handler: FormRouter.requestWebinar,
+});
 
-export default router;
+export default formRouter;
