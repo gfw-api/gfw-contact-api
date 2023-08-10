@@ -4,6 +4,7 @@ import config from 'config';
 import { createClient, RedisClientType } from 'redis';
 import ChaiHttp from 'chai-http';
 import { getTestServer } from './utils/test-server';
+import { mockValidateRequestWithApiKey } from './utils/helpers';
 
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
@@ -29,8 +30,10 @@ describe('Request webinar endpoint tests', () => {
     });
 
     it('Name is required when trying to create a new webinar request', async () => {
+        mockValidateRequestWithApiKey({});
         const response = await requester
             .post(`/api/v1/form/request-webinar`)
+            .set('x-api-key', 'api-key-test')
             .set('Content-Type', 'application/json')
             .send();
 
@@ -41,8 +44,10 @@ describe('Request webinar endpoint tests', () => {
     });
 
     it('Email is required when trying to create a new webinar request', async () => {
+        mockValidateRequestWithApiKey({});
         const response = await requester
             .post(`/api/v1/form/request-webinar`)
+            .set('x-api-key', 'api-key-test')
             .set('Content-Type', 'application/json')
             .send({ name: 'Test' });
 
@@ -53,8 +58,10 @@ describe('Request webinar endpoint tests', () => {
     });
 
     it('A correctly formatted email is required when trying to create a new webinar request', async () => {
+        mockValidateRequestWithApiKey({});
         const response = await requester
             .post(`/api/v1/form/request-webinar`)
+            .set('x-api-key', 'api-key-test')
             .set('Content-Type', 'application/json')
             .send({
                 name: 'Test',
@@ -68,8 +75,10 @@ describe('Request webinar endpoint tests', () => {
     });
 
     it('A request text is required when trying to create a new webinar request', async () => {
+        mockValidateRequestWithApiKey({});
         const response = await requester
             .post(`/api/v1/form/request-webinar`)
+            .set('x-api-key', 'api-key-test')
             .set('Content-Type', 'application/json')
             .send({
                 name: 'Test',
@@ -83,6 +92,7 @@ describe('Request webinar endpoint tests', () => {
     });
 
     it('A request for a webinar should queue an email (happy case)', async () => {
+        mockValidateRequestWithApiKey({});
         const requestData = {
             name: 'Test',
             email: 'example@gmail.com',
@@ -118,6 +128,7 @@ describe('Request webinar endpoint tests', () => {
 
         const response = await requester
             .post(`/api/v1/form/request-webinar`)
+            .set('x-api-key', 'api-key-test')
             .set('Content-Type', 'application/json')
             .send(requestData);
         response.status.should.equal(204);

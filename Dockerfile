@@ -1,13 +1,13 @@
-FROM node:18.14-buster-slim
+FROM node:20.4-alpine3.18
 MAINTAINER info@vizzuality.com
 
 ENV NAME gfw-contact-api
 ENV USER microservice
 
-RUN apt-get update -y && apt-get upgrade -y && \
-    apt-get install -y bash git
+RUN addgroup $USER && adduser -s /bin/bash -D -G $USER $USER
 
-RUN addgroup $USER && useradd -ms /bin/bash $USER -g $USER
+RUN apk update && apk upgrade && \
+    apk add --no-cache --update bash git openssh python3 build-base
 
 RUN mkdir -p /opt/$NAME
 COPY package.json /opt/$NAME/package.json
