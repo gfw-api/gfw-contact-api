@@ -37,27 +37,27 @@
     "tools": {
       "gfw": {
         "name": "GFW",
-        "emailTo": "gfw2@wri.org"
+        "emailTo": "gfw@wri.org"
       },
       "gfw-pro": {
         "name": "GFW Pro",
-        "emailTo": "gfwprosupport@wri.org"
+        "emailTo": "gfwprosales@wri.org"
       },
       "fw": {
         "name": "Forest Watcher",
-        "emailTo": "gfw2@wri.org"
+        "emailTo": "gfw@wri.org"
       },
       "blog": {
         "name": "GFW Blog",
-        "emailTo": "gfw2@wri.org"
+        "emailTo": "gfw@wri.org"
       },
       "map-builder": {
         "name": "GFW MapBuilder",
-        "emailTo": "gfw2@wri.org"
+        "emailTo": "gfw@wri.org"
       },
       "not-applicable": {
         "name": "Not applicable",
-        "emailTo": "gfw2@wri.org"
+        "emailTo": "gfw@wri.org"
       }
     }
   }
