@@ -32,6 +32,9 @@ describe('Contact us endpoint tests', () => {
     it('Calling the contact us endpoint returns 200 OK (happy case, minimum data)', async () => {
         mockValidateRequestWithApiKey({});
         let expectedQueueMessageCount = 2;
+        const first_name = 'test';
+        const last_name = 'user';
+        const user_email = 'test@user.org';
 
         const validateMailQueuedMessages = (resolve: (value: (PromiseLike<unknown> | unknown)) => void) => async (message: string) => {
             const jsonMessage = JSON.parse(message);
@@ -40,7 +43,9 @@ describe('Contact us endpoint tests', () => {
 
                 case 'contact-form':
                     jsonMessage.should.have.property('data').and.deep.equal({
-                        user_email: 'test@user.org',
+                        first_name,
+                        last_name,
+                        user_email,
                         topic: config.get('contactEmail.topics.general-inquiry.name'),
                         tool: config.get('contactEmail.tools.not-applicable.name'),
                         message: 'This is a test message',
@@ -50,7 +55,9 @@ describe('Contact us endpoint tests', () => {
                     break;
                 case 'contact-form-confirmation-en':
                     jsonMessage.should.have.property('data').and.deep.equal({
-                        user_email: 'test@user.org',
+                        first_name,
+                        last_name,
+                        user_email,
                         topic: config.get('contactEmail.topics.general-inquiry.name'),
                         tool: config.get('contactEmail.tools.not-applicable.name'),
                         message: 'This is a test message',
@@ -81,7 +88,12 @@ describe('Contact us endpoint tests', () => {
         const response = await requester
             .post(`/api/v1/form/contact-us`)
             .set('x-api-key', 'api-key-test')
-            .send({ email: 'test@user.org', message: 'This is a test message' });
+            .send({
+                first_name,
+                last_name,
+                email: user_email,
+                message: 'This is a test message'
+            });
 
         response.status.should.equal(200);
         response.body.should.eql({});
@@ -92,6 +104,9 @@ describe('Contact us endpoint tests', () => {
     it('Calling the contact us endpoint returns 200 OK (happy case, custom topic and tool)', async () => {
         mockValidateRequestWithApiKey({});
         let expectedQueueMessageCount = 2;
+        const first_name = 'test';
+        const last_name = 'user';
+        const user_email = 'test@user.org';
 
         const validateMailQueuedMessages = (resolve: (value: (PromiseLike<unknown> | unknown)) => void) => async (message: string) => {
             const jsonMessage = JSON.parse(message);
@@ -100,7 +115,9 @@ describe('Contact us endpoint tests', () => {
 
                 case 'contact-form':
                     jsonMessage.should.have.property('data').and.deep.equal({
-                        user_email: 'test@user.org',
+                        first_name,
+                        last_name,
+                        user_email,
                         topic: config.get('contactEmail.topics.report-a-bug-or-error.name'),
                         tool: config.get('contactEmail.tools.fw.name'),
                         message: 'This is a test message',
@@ -110,7 +127,9 @@ describe('Contact us endpoint tests', () => {
                     break;
                 case 'contact-form-confirmation-en':
                     jsonMessage.should.have.property('data').and.deep.equal({
-                        user_email: 'test@user.org',
+                        first_name,
+                        last_name,
+                        user_email,
                         topic: config.get('contactEmail.topics.report-a-bug-or-error.name'),
                         tool: config.get('contactEmail.tools.fw.name'),
                         message: 'This is a test message',
@@ -142,7 +161,9 @@ describe('Contact us endpoint tests', () => {
             .post(`/api/v1/form/contact-us`)
             .set('x-api-key', 'api-key-test')
             .send({
-                email: 'test@user.org',
+                first_name,
+                last_name,
+                email: user_email,
                 message: 'This is a test message',
                 topic: 'report-a-bug-or-error',
                 tool: 'fw'
@@ -157,6 +178,9 @@ describe('Contact us endpoint tests', () => {
     it('Calling the contact us endpoint returns 200 OK (happy case, custom topic and tool, custom language)', async () => {
         mockValidateRequestWithApiKey({});
         let expectedQueueMessageCount = 2;
+        const first_name = 'test';
+        const last_name = 'user';
+        const user_email = 'test@user.org';
 
         const validateMailQueuedMessages = (resolve: (value: (PromiseLike<unknown> | unknown)) => void) => async (message: string) => {
             const jsonMessage = JSON.parse(message);
@@ -165,7 +189,9 @@ describe('Contact us endpoint tests', () => {
 
                 case 'contact-form':
                     jsonMessage.should.have.property('data').and.deep.equal({
-                        user_email: 'test@user.org',
+                        first_name,
+                        last_name,
+                        user_email,
                         topic: config.get('contactEmail.topics.report-a-bug-or-error.name'),
                         tool: config.get('contactEmail.tools.fw.name'),
                         message: 'This is a test message',
@@ -175,7 +201,9 @@ describe('Contact us endpoint tests', () => {
                     break;
                 case 'contact-form-confirmation-es':
                     jsonMessage.should.have.property('data').and.deep.equal({
-                        user_email: 'test@user.org',
+                        first_name,
+                        last_name,
+                        user_email,
                         topic: config.get('contactEmail.topics.report-a-bug-or-error.name'),
                         tool: config.get('contactEmail.tools.fw.name'),
                         message: 'This is a test message',
@@ -207,7 +235,9 @@ describe('Contact us endpoint tests', () => {
             .post(`/api/v1/form/contact-us`)
             .set('x-api-key', 'api-key-test')
             .send({
-                email: 'test@user.org',
+                first_name,
+                last_name,
+                email: user_email,
                 message: 'This is a test message',
                 topic: 'report-a-bug-or-error',
                 tool: 'fw',

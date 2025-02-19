@@ -22,6 +22,8 @@ const contactUsValidation: Record<string, any> = {
         loggedUser: Joi.any().optional(),
     },
     body: Joi.object({
+        first_name: Joi.string().required(),
+        last_name: Joi.string().required(),
         email: Joi.string().email().required(),
         topic: Joi.string().valid(...ALLOWED_TOPICS).default('general-inquiry').optional(),
         tool: Joi.string().valid(...ALLOWED_TOOLS).default('not-applicable').optional(),
@@ -51,6 +53,8 @@ class FormRouter {
         const topicObj: Record<string, any> = mailParams.topics[topic || 'general-inquiry'];
         const toolObj: Record<string, any> = mailParams.tools[tool || 'not-applicable'];
         const mailData: Record<string, any> = {
+            first_name: ctx.request.body.first_name,
+            last_name: ctx.request.body.last_name,
             user_email: ctx.request.body.email,
             message: ctx.request.body.message,
             topic: topicObj.name,
