@@ -29,6 +29,7 @@ const contactUsValidation: Record<string, any> = {
         tool: Joi.string().valid(...ALLOWED_TOOLS).default('not-applicable').optional(),
         language: Joi.string().valid(...ALLOWED_LANGUAGES).default('en').optional(),
         message: Joi.string().required(),
+        signup: Joi.boolean().default(false).optional()
     }).required()
 };
 
