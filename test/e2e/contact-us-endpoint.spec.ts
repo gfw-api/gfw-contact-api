@@ -49,7 +49,9 @@ describe('Contact us endpoint tests', () => {
                         topic: config.get('contactEmail.topics.general-inquiry.name'),
                         tool: config.get('contactEmail.tools.not-applicable.name'),
                         message: 'This is a test message',
-                        subject: `Contact form: ${config.get('contactEmail.topics.general-inquiry.name')} for ${config.get('contactEmail.tools.not-applicable.name')}`
+                        subject: `Contact form: ${config.get('contactEmail.topics.general-inquiry.name')} for ${config.get('contactEmail.tools.not-applicable.name')}`,
+                        opt_in: false
+
                     });
                     jsonMessage.should.have.property('recipients').and.deep.equal([{ address: config.get('contactEmail.tools.not-applicable.emailTo') }]);
                     break;
@@ -61,7 +63,8 @@ describe('Contact us endpoint tests', () => {
                         topic: config.get('contactEmail.topics.general-inquiry.name'),
                         tool: config.get('contactEmail.tools.not-applicable.name'),
                         message: 'This is a test message',
-                        subject: `Contact form: ${config.get('contactEmail.topics.general-inquiry.name')} for ${config.get('contactEmail.tools.not-applicable.name')}`
+                        subject: `Contact form: ${config.get('contactEmail.topics.general-inquiry.name')} for ${config.get('contactEmail.tools.not-applicable.name')}`,
+                        opt_in: false
                     });
                     jsonMessage.should.have.property('recipients').and.deep.equal([{ address: 'test@user.org' }]);
                     break;
@@ -121,7 +124,8 @@ describe('Contact us endpoint tests', () => {
                         topic: config.get('contactEmail.topics.report-a-bug-or-error.name'),
                         tool: config.get('contactEmail.tools.fw.name'),
                         message: 'This is a test message',
-                        subject: `Contact form: ${config.get('contactEmail.topics.report-a-bug-or-error.name')} for ${config.get('contactEmail.tools.fw.name')}`
+                        subject: `Contact form: ${config.get('contactEmail.topics.report-a-bug-or-error.name')} for ${config.get('contactEmail.tools.fw.name')}`,
+                        opt_in: false
                     });
                     jsonMessage.should.have.property('recipients').and.deep.equal([{ address: config.get('contactEmail.tools.fw.emailTo') }]);
                     break;
@@ -133,7 +137,8 @@ describe('Contact us endpoint tests', () => {
                         topic: config.get('contactEmail.topics.report-a-bug-or-error.name'),
                         tool: config.get('contactEmail.tools.fw.name'),
                         message: 'This is a test message',
-                        subject: `Contact form: ${config.get('contactEmail.topics.report-a-bug-or-error.name')} for ${config.get('contactEmail.tools.fw.name')}`
+                        subject: `Contact form: ${config.get('contactEmail.topics.report-a-bug-or-error.name')} for ${config.get('contactEmail.tools.fw.name')}`,
+                        opt_in: false
                     });
                     jsonMessage.should.have.property('recipients').and.deep.equal([{ address: 'test@user.org' }]);
                     break;
@@ -175,7 +180,7 @@ describe('Contact us endpoint tests', () => {
         return consumerPromise;
     });
 
-    it('Calling the contact us endpoint returns 200 OK (happy case, custom topic and tool, custom language)', async () => {
+    it('Calling the contact us endpoint returns 200 OK (happy case, custom topic and tool, custom language, sign up)', async () => {
         mockValidateRequestWithApiKey({});
         let expectedQueueMessageCount = 2;
         const first_name = 'test';
@@ -195,7 +200,8 @@ describe('Contact us endpoint tests', () => {
                         topic: config.get('contactEmail.topics.report-a-bug-or-error.name'),
                         tool: config.get('contactEmail.tools.fw.name'),
                         message: 'This is a test message',
-                        subject: `Contact form: ${config.get('contactEmail.topics.report-a-bug-or-error.name')} for ${config.get('contactEmail.tools.fw.name')}`
+                        subject: `Contact form: ${config.get('contactEmail.topics.report-a-bug-or-error.name')} for ${config.get('contactEmail.tools.fw.name')}`,
+                        opt_in: true
                     });
                     jsonMessage.should.have.property('recipients').and.deep.equal([{ address: config.get('contactEmail.tools.fw.emailTo') }]);
                     break;
@@ -207,7 +213,8 @@ describe('Contact us endpoint tests', () => {
                         topic: config.get('contactEmail.topics.report-a-bug-or-error.name'),
                         tool: config.get('contactEmail.tools.fw.name'),
                         message: 'This is a test message',
-                        subject: `Contact form: ${config.get('contactEmail.topics.report-a-bug-or-error.name')} for ${config.get('contactEmail.tools.fw.name')}`
+                        subject: `Contact form: ${config.get('contactEmail.topics.report-a-bug-or-error.name')} for ${config.get('contactEmail.tools.fw.name')}`,
+                        opt_in: true
                     });
                     jsonMessage.should.have.property('recipients').and.deep.equal([{ address: 'test@user.org' }]);
                     break;
@@ -241,7 +248,8 @@ describe('Contact us endpoint tests', () => {
                 message: 'This is a test message',
                 topic: 'report-a-bug-or-error',
                 tool: 'fw',
-                language: 'es_MX'
+                language: 'es_MX',
+                signup: 'true'
             });
 
         response.status.should.equal(200);
